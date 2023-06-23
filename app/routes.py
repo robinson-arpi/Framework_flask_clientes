@@ -1,10 +1,11 @@
 from . import create_app
 from . import db
 from .models import Cliente
-from flask import jsonify
-from flask import request
+from flask import jsonify, redirect, request, abort, render_template, url_for
+from flask_cors import CORS
 
 app = create_app('development')
+CORS(app)
 
 # Crea el contexto de aplicación
 app.app_context().push()
@@ -13,21 +14,27 @@ app.app_context().push()
 db.create_all()
 
 #inicio
-@app.route('/', methods=['GET'])
-def inicio():
-    return "Inicio"
+@app.route('/')
+def index():
+    clientes = Cliente.query.all()
+    return render_template('index.html', clientes = clientes)
 
 @app.route("/api/getClientes", methods=["GET"])
 def get_clientes():
     clientes = Cliente.query.all()
-    return jsonify([cliente.to_json() for cliente in clientes])
+    response = jsonify([cliente.to_json() for cliente in clientes])
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 @app.route("/api/getCliente/<int:id>", methods=["GET"])
 def get_cliente(id):
     cliente = Cliente.query.get(id)
     if cliente is None:
         return jsonify({'message': 'Cliente no encontrado'})
-    return jsonify(cliente.to_json())
+    response = jsonify(cliente.to_json())
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+    
 
 @app.route("/api/deleteCliente/<int:id>", methods=["DELETE"])
 def delete_cliente(id):
@@ -36,7 +43,10 @@ def delete_cliente(id):
         return jsonify({'message': 'Cliente no encontrado'})
     db.session.delete(cliente)
     db.session.commit()
-    return jsonify({'message': 'Cliente eliminado correctamente'})
+    response = jsonify({'message': 'Cliente eliminado correctamente'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
 
 @app.route('/api/updateCliente/<int:id>', methods=['PUT'])
 def update_cliente(id):
@@ -50,10 +60,14 @@ def update_cliente(id):
     cliente.telefono = request.json.get('telefono', cliente.telefono)
     cliente.correo = request.json.get('correo', cliente.correo)
     db.session.commit()
-    return jsonify({'message': 'Cliente actualizado correctamente'})
+    
+    response = jsonify({'message': 'Cliente actualizado correctamente'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+    
 
 @app.route('/api/addCliente', methods=['POST'])
-def create_cliente():
+def add_cliente():
     if not request.json:
         return jsonify({'message': 'Sin respuesta'})
     cliente = Cliente(
@@ -64,4 +78,6 @@ def create_cliente():
     )
     db.session.add(cliente)
     db.session.commit()
-    return jsonify({'message': 'Cliente creado correctamente'})
+    response = (jsonify({'message': 'Cliente creado correctamente'})).headers.add('Access-Control-Allow-Origin', '*') 
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response

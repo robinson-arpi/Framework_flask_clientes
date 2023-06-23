@@ -10,6 +10,7 @@ class Cliente(db.Model):
 
     def to_json(self):
         return {
+            'id': self.id,
             'nombre': self.nombre,
             'direccion': self.direccion,
             'telefono': self.telefono,
