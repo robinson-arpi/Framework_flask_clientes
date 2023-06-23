@@ -1,7 +1,6 @@
 $(document).ready(function() {
     // Función para cargar los clientes en la tabla
-    function cargarTablaClientes() { 
-        
+    function cargarTablaClientes() {     
       // Realizar una solicitud GET a la API para obtener los clientes
       fetch('http://localhost:5000/api/getClientes')
       .then(response => response.json())
@@ -10,7 +9,6 @@ $(document).ready(function() {
         var html = '';
         response.forEach(cliente => {
           var id = cliente.id;
-          alert(id)
           var nombre = cliente.nombre;
           var direccion = cliente.direccion;
           var telefono = cliente.telefono;

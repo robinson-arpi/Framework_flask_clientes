@@ -2,10 +2,8 @@ from . import create_app
 from . import db
 from .models import Cliente
 from flask import jsonify, redirect, request, abort, render_template, url_for
-from flask_cors import CORS
 
 app = create_app('development')
-CORS(app)
 
 # Crea el contexto de aplicación
 app.app_context().push()
