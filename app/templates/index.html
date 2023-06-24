@@ -1,12 +1,17 @@
 
 {% extends "base.html" %}
 
-<title>{% block titutlo %}CRUD Clientes{% endblock %}</title>
+{% block titutlo %}CRUD Clientes{% endblock %}
+
+{% block palabras_clave %}
+<meta name = "keyword" content = "crud">
+{% endblock %}
+
 {% block archivos_css %}
 <link rel="stylesheet" href="../static/css/estilos.css">
 {% endblock %}
 
-{% block contenido%}
+{% block contenido %}
 <div class="container-fluid mt-5">
     <h2>Registro de Clientes</h2>
     <div class="row">

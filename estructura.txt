@@ -1,0 +1,9 @@
+app
+-templates 
+--index.html
+--base.html
+-models.py-> Esquema de la base de datos y ORM
+-routes.py -> funciones API
+-init.py -> instanciar base de datos y aplicaciones
+clientes_crud.py -> Archivo principal
+config.py -> configuracion para la API

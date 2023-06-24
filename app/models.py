@@ -8,6 +8,7 @@
 #     telefono = db.Column(db.String(100), nullable=False)
 #     correo = db.Column(db.String(100), nullable=False)
 
+#     # Convertir cliente a JSON para devolverlo al navegador
 #     def to_json(self):
 #         return {
 #             'id': self.id,
