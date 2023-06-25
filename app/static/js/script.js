@@ -1,14 +1,15 @@
 $(document).ready(function() {
+
   // Función para cargar los clientes en la tabla
-  function cargarTablaClientes() { 
+  async function cargarTablaClientes() { 
       
-    // solicitud para obtener clientes
-    fetch('http://localhost:5000/api/getClientes')
-    .then(response => response.json())
-    .then(response => {
+    // Realizar una solicitud GET a la API para obtener los items
+    try {
+      const response = await fetch('http://localhost:5000/api/getClientes');
+      const data = await response.json();
 
       var html = '';
-      response.forEach(cliente => {
+      data.forEach(cliente => {
         var id = cliente.id;
         var nombre = cliente.nombre;
         var direccion = cliente.direccion;
@@ -38,76 +39,70 @@ $(document).ready(function() {
         if (id !== undefined) {
           confirmarEliminarCliente(id);
         }
-      });
-      
-    })
-    .catch(error => mostrarMensaje('Error', 'Error al cargar los clientes. '));
-  }  
+      });   
+    
+    } catch (error) {
+      mostrarMensaje('Error', 'Error al cargar los clientes.');
+    }
+    
+  }
 
   // Función para mostrar el formulario de modificación con los datos del cliente
-  function mostrarFormularioModificar(id) {
-    fetch('http://localhost:5000/api/getCliente/' + id, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(response => response.json())
-      .then(cliente => {
-        $('#clienteId').val(cliente.id);
-        $('#nombreEdit').val(cliente.nombre);
-        $('#direccionEdit').val(cliente.direccion);
-        $('#telefonoEdit').val(cliente.telefono);
-        $('#correoEdit').val(cliente.correo);
-  
-        $('#modalEditar').modal('show');
-      })
-      .catch(error => {
-        mostrarMensaje('Error', 'Error al obtener los datos del cliente.');
-      });
+  async function mostrarFormularioModificar(id) {
+    try {
+      const response = await fetch('http://localhost:5000/api/getCliente/' + id);
+      const cliente = await response.json();
+
+      $('#clienteId').val(cliente.id);
+      $('#nombreEdit').val(cliente.nombre);
+      $('#direccionEdit').val(cliente.direccion);
+      $('#telefonoEdit').val(cliente.telefono);
+      $('#correoEdit').val(cliente.correo);
+
+      $('#modalEditar').modal('show');
+
+    } catch (error) {
+      mostrarMensaje('Error', 'Error al obtener los datos del cliente.');
+    }
   }
   
 
   // Función para confirmar la eliminación de un cliente
-  function confirmarEliminarCliente(id) {
-    fetch('http://localhost:5000/api/getCliente/' + id, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(response => response.json())
-      .then(cliente => {
-        $('#nombreEliminar').text(cliente.nombre);
-        $('#direccionEliminar').text(cliente.direccion);
-        $('#telefonoEliminar').text(cliente.telefono);
-        $('#correoEliminar').text(cliente.correo);
-        $('#clienteIdEliminar').val(cliente.id);
-  
-        $('#modalEliminar').modal('show');
-      })
-      .catch(error => {
-        mostrarMensaje('Error', 'Error al obtener los datos del cliente para eliminar.');
-      });
+  async function confirmarEliminarCliente(id) {
+    try {
+      const response = await fetch('http://localhost:5000/api/getCliente/' + id);
+      const cliente = await response.json();
+
+      $('#nombreEliminar').text(cliente.nombre);
+      $('#direccionEliminar').text(cliente.direccion);
+      $('#telefonoEliminar').text(cliente.telefono);
+      $('#correoEliminar').text(cliente.correo);
+      $('#clienteIdEliminar').val(cliente.id);
+
+      $('#modalEliminar').modal('show');
+
+    } catch (error) {
+      mostrarMensaje('Error', 'Error al obtener los datos del cliente para eliminar.');
+    }
   }
   
   // Función para eliminar un cliente
-  function eliminarCliente(id) {
-    fetch('http://localhost:5000/api/deleteCliente/' + id, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(response => response.json())
-      .then(response => {
-        cargarTablaClientes();
-        $('#modalEliminar').modal('hide');
-        mostrarMensaje('Operación exitosa', response.message);
-      })
-      .catch(error => {
-        mostrarMensaje('Error', 'Error al eliminar el cliente.');
+  async function eliminarCliente(id) {
+    try {
+      const response = await fetch('http://localhost:5000/api/deleteCliente/' + id, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
+      const data = await response.json();
+
+      cargarTablaClientes();
+      $('#modalEliminar').modal('hide');
+      mostrarMensaje('Operación exitosa', data.message);
+    } catch (error) {
+      mostrarMensaje('Error', 'Error al eliminar el cliente.');
+    }
   }
   
 
@@ -119,7 +114,8 @@ $(document).ready(function() {
     $('#mensajeModal').modal('show');
   }
 
-  $('#formulario-agregar-cliente').submit(function(event) {
+  // Función para agregar cliente
+  $('#formulario-agregar-cliente').submit(async function(event) {
     event.preventDefault();
   
     // Obtener referencias a los campos del formulario
@@ -142,35 +138,32 @@ $(document).ready(function() {
         correo: correoInput.value
       };
   
-      fetch('http://localhost:5000/api/addCliente', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(datosAgregar)
-      })
-      .then(function(response) {
+      try {
+        const response = await fetch('http://localhost:5000/api/addCliente', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(datosAgregar)
+        });
+  
         if (response.ok) {
+          const data = await response.json();
           cargarTablaClientes();
-          return response.json(); 
+          mostrarMensaje('Operación exitosa', data.message);
         } else {
           throw new Error('Error en la solicitud');
         }
-      })
-      .then(function(data) {
-        mostrarMensaje('Operación exitosa', data.message); 
-      })
-      .catch(function(error) {
+      } catch (error) {
         mostrarMensaje('Error', 'Error al agregar el cliente.');
-      });
+      }
   
       $('#formulario-agregar-cliente')[0].reset();
     }
   });  
-  
 
   // Evento de submit para actualizar un cliente
-  document.getElementById('formularioEditar').addEventListener('submit', function(event) {
+  document.getElementById('formularioEditar').addEventListener('submit', async function(event) {
     event.preventDefault();
   
     if (validarFormulario()) {
@@ -183,22 +176,22 @@ $(document).ready(function() {
         telefono: $('#telefonoEdit').val()
       };
   
-      fetch('http://localhost:5000/api/updateCliente/' + idEditar, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(datosModificar)
-      })
-        .then(response => response.json())
-        .then(response => {
-          cargarTablaClientes();
-          $('#modalEditar').modal('hide');
-          mostrarMensaje('Operación exitosa', response.message);
-        })
-        .catch(error => {
-          mostrarMensaje('Error', 'Error al modificar el cliente.');
+      try {
+        const response = await fetch('http://localhost:5000/api/updateCliente/' + idEditar, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(datosModificar)
         });
+  
+        const data = await response.json();
+        cargarTablaClientes();
+        $('#modalEditar').modal('hide');
+        mostrarMensaje('Operación exitosa', data.message);
+      } catch (error) {
+        mostrarMensaje('Error', 'Error al modificar el cliente.');
+      }
     }
   });
 
